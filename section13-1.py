@@ -39,19 +39,21 @@ while n <= 5:                                # 5회 반복
     random.shuffle(words)                    # List shuffle!
     q = random.choice(words)                 # List -> words random extract!
 
+    print('\n')
 
     print("*Question # {}".format(n))
     print(q)                                 # 문제 출력
 
     x = input()                              # 타이핑 입력
 
+    print('\n')
     
     if str(q).strip() == str(x).strip():     # 입력 확인(공백제거)
-        print("Pass!")
-        cor_cnt += 1                         # 정답 개수 카운트
+      print("Pass!")
+      cor_cnt += 1                         # 정답 개수 카운트
 
     else:
-        print("Wrong!")
+      print("Wrong!")
 
     n += 1                                   # 다음 문제 전환
 
