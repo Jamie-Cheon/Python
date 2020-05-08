@@ -1,86 +1,73 @@
-# Section13-2
-# 업그레이드 타이핑 게임 제작
-# 사운드 적용 및 DB 연동
+# Section13-1.py
+# Typing game 
+# Complete basic structure 
 
+# Import 
 import random
 import time
-# 사운드 출력 필요 모듈
-import sqlite3
-import datetime # 기록 시간을 읽어오기위해     
+import sqlite3          # DB 
+import datetime         # To read a record time 
 
-# DB생성 & Autocommit
-# 본인 DB 파일 경로
+# Variables
+words = []              # Store words
+cnt = 1                 # Game count
+val = ''                # Input value
+cor_cnt = 0             # Number of correct answer
+
+# Create/Connect DB & Autocommit
 conn = sqlite3.connect('./resource/records.db', isolation_level=None)
+# connect cursor 
+c = conn.cursor()       
+# Create Table (Datatype : TEXT, NUMERIC, INTEGER, REAL, BLOB)
+c.execute("CREATE TABLE IF NOT EXISTS records(id INTEGER PRIMARY KEY AUTOINCREMENT, cor_cnt INTEGER, record TEXT, regdate TEXT)")
 
-# Cursor연결
-cursor = conn.cursor()
 
-# 테이블 생성(Datatype : TEXT NUMERIC INTEGER REAL BLOB)
-cursor.execute(
-    "CREATE TABLE IF NOT EXISTS records(id INTEGER PRIMARY KEY AUTOINCREMENT,  cor_cnt INTEGER, record text, regdate text)"
+# Connect words file 
+with open('./resource/word.txt', 'r') as f:
+    for i in f:                       # Store words to variable 'words'  
+      words.append(i.strip())         # Strip() : remove white spaces  
+
+# print(words)                         # Check words list  
+input("Ready? Press Enter Key!!")     
+st = time.time()                      # Store start time after enter 
+
+# Game Start
+while cnt <= 5:
+  random.shuffle(words)               # shuffle words in the list 
+  q = random.choice(words)            # extract word randomly
+
+  print()
+  print("Question {}".format(cnt))
+  
+  val = input(q + '\n')               # store input
+  
+  if str(val).strip() == str(q).strip():
+    print("pass!!")
+    cor_cnt += 1                      # increase number of correct answer
+  else:
+    print("Wrong!!")
+
+  cnt += 1                            # increase game count 
+
+
+et = time.time()
+
+tt = et - st
+tt = format(tt, ".3f")
+# Insert records to DB
+c.execute(
+  "INSERT INTO records('cor_cnt','record','regdate') VALUES(?,?,?)",
+  (
+     cor_cnt, tt, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+  )
 )
 
-words = []                                   # 영어 단어 리스트(1000개 로드)
-
-n = 1                                        # 게임 시도 횟수
-cor_cnt = 0                                  # 정답 개수
-
-with open('./resource/word.txt', 'r') as f:  # 문제 txt 파일 로드
-    for c in f:
-        words.append(c.strip())
-
-print(words)                                 # 단어 리스트 확인
-
-input("Ready? Press Enter Key!")             # Enter Game Start!
-
-start = time.time()                          # Start Time
-
-while n <= 5:                                # 5회 반복
-    random.shuffle(words)                    # List shuffle!
-    q = random.choice(words)                 # List -> words random extract!
-
-    print('\n')
-
-    print("*Question # {}".format(n))
-    print(q)                                 # 문제 출력
-
-    x = input()                              # 타이핑 입력
-
-    print('\n')
-    
-    if str(q).strip() == str(x).strip():     # 입력 확인(공백제거)
-      print("Pass!")
-      cor_cnt += 1                         # 정답 개수 카운트
-
-    else:
-      print("Wrong!")
-
-    n += 1                                   # 다음 문제 전환
-
-end = time.time()                            # End Time
-et = end - start                             # 총 게임 시간
-
-et = format(et, ".3f")                       # 소수 셋째 자리 출력(시간)
-
-print()
-print('--------------')
-
-
-if cor_cnt >= 3:                             # 3개 이상 합격
-    print("결과 : 합격")
-else:
-    print("불합격")
-
-# 기록 DB 삽입
-cursor.execute(
-    "INSERT INTO records('cor_cnt', 'record', 'regdate') VALUES (?, ?, ?)",
-    (
-        cor_cnt, et, datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-    )
-)
-
-# 접속 해제
+# Disconnect DB
 conn.close()
 
-# 수행 시간 출력
-print("게임 시간 :", et, "초", "정답 개수 : {}".format(cor_cnt))
+# Show game result
+print("\nCorrect Answer : {}".format(cor_cnt), "\nTotal time : ", tt, "sec")
+
+# start point
+if __name__ == '__main__':
+  pass
